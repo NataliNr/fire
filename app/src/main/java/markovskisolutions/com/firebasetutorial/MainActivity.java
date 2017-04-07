@@ -9,16 +9,20 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.google.firebase.iid.FirebaseInstanceId;
 
 import java.io.IOException;
+import java.sql.SQLException;
+
 import okhttp3.OkHttpClient;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
 
     EditText username, password;
+    String name;
     String token = FirebaseInstanceId.getInstance().getToken();
 
     @Override
@@ -26,9 +30,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         username = (EditText) findViewById(R.id.name);
-        username.toString();
         password = (EditText) findViewById(R.id.password);
-
         // If a notification message is tapped, any data accompanying the notification
         // message is available in the intent extras. In this sample the launcher
         // intent is fired when the notification is tapped, so any accompanying data would
@@ -50,6 +52,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Log.d(TAG, token);
+                 name= username.getText().toString();
                 new attemptLogin().execute();
 //                Toast.makeText(MainActivity.this, msg, Toast.LENGTH_SHORT).show();
             }
@@ -65,15 +68,26 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPreExecute(){
             //           result = false;
-            progressDialog= new ProgressDialog(MainActivity.this);
-            progressDialog.setCancelable(false);
-            progressDialog.setMessage("add");
+//            progressDialog= new ProgressDialog(MainActivity.this);
+//            progressDialog.setCancelable(false);
+//            progressDialog.setMessage("add");
 
         }
         @Override
         protected Void doInBackground(Void... voids) {
             DBHelper dbHelper=new DBHelper();
-            result = dbHelper.addDetails(token);
+            try {
+                long id = dbHelper.checkUser(name);
+                if (id == -1) {
+                    result = dbHelper.addDetails(token);
+                    Toast.makeText(MainActivity.this,
+                            "Daaaaa",
+                            Toast.LENGTH_SHORT).show();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
             return null;
         }
 

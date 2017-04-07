@@ -1,10 +1,12 @@
 package markovskisolutions.com.firebasetutorial;
+import android.database.Cursor;
 import android.util.Log;
 import android.widget.EditText;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -35,22 +37,12 @@ public class DBHelper {
         }
     }
 
-//    private void createTable() {
-//        String query = "CREATE TABLE IF NOT EXISTS"+ AppConfig.TABLE_NAME +"(uid int PRIMARY KEY auto_increment,"
-//        +"token varchar(255) not null,";
-//        try {
-//            Statement statement = connection.createStatement();
-//        }
-//        catch (SQLException s){
-//            Log.e(TAG, s.getMessage());
-//        }
-//    }
 
     public  boolean addDetails(String token){
        boolean result=false;
         try {
             PreparedStatement preparedStatement=
-                    connection.prepareStatement("INSERT INTO " + AppConfig.TABLE_NAME + " (pushNotificationToken) " +" VALUES(?) ");
+                    connection.prepareStatement("INSERT INTO " + AppConfig.TABLE_LOGINLOG + "(pushNotificationToken) " + " VALUES(?) ");
             preparedStatement.setString(1,token);
             result=preparedStatement.execute();
             preparedStatement.close();
@@ -59,5 +51,20 @@ public class DBHelper {
             Log.e(TAG, s.getMessage());
         }
         return result;
+    }
+
+    public long checkUser(String user) throws SQLException {
+        int id=-1;
+        String query = "Select * FROM " +  AppConfig.TABLE_USER + " WHERE " + AppConfig.COLUMN_USER
+                + " LIKE  " + user + "";
+        Statement statement = connection.createStatement();
+        ResultSet rs = statement.executeQuery(query);
+        Cursor cursor= (Cursor) rs;
+        if(cursor.getCount()>0) {
+            cursor.moveToFirst();
+            id=cursor.getInt(0);
+            cursor.close();
+        }
+        return id;
     }
 }
