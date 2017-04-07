@@ -17,12 +17,12 @@ import okhttp3.Response;
 public class AppConfig {
 
 
-    public static final String db_connection="jdbc:mysql://192.168.1.138:3306/new_schema?useSSL=false";
-    public static final String db_user="root";
-    public static final String db_pass="root";
-    public static final String Driver="com.mysql.jdbc.Driver";
-    public static final String TABLE_LOGINLOG="loginlog";
-    public static final String TABLE_USER="user";
-    public static final String COLUMN_USER="username";
+    public static final String db_connection="";
+    public static final String db_user="";
+    public static final String db_pass="";
+    public static final String Driver="";
+    public static final String TABLE_LOGINLOG="";
+    public static final String TABLE_USER="";
+    public static final String COLUMN_USER="";
 
 }
