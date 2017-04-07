@@ -1,6 +1,7 @@
 package markovskisolutions.com.firebasetutorial;
 
 
+import android.app.ProgressDialog;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -8,7 +9,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import com.google.firebase.iid.FirebaseInstanceId;
 
@@ -19,11 +19,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
 
     EditText username, password;
-    private String response;
-    private OkHttpClient client;
     String token = FirebaseInstanceId.getInstance().getToken();
-    String url = "https://red.fach-it.de/mobility-platform/";
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,8 +28,6 @@ public class MainActivity extends AppCompatActivity {
         username = (EditText) findViewById(R.id.name);
         username.toString();
         password = (EditText) findViewById(R.id.password);
-        client = new OkHttpClient();
-        client = new OkHttpClient.Builder().build();
 
         // If a notification message is tapped, any data accompanying the notification
         // message is available in the intent extras. In this sample the launcher
@@ -55,15 +49,8 @@ public class MainActivity extends AppCompatActivity {
         logTokenButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                // Get token
-//
-//
-//                // Log and toast
-//                String msg = getString(R.string.msg_token_fmt, token);
-                Log.d(TAG, String.valueOf(username));
-                Log.d(TAG, url);
                 Log.d(TAG, token);
-                attemptLogin(url);
+                new attemptLogin().execute();
 //                Toast.makeText(MainActivity.this, msg, Toast.LENGTH_SHORT).show();
             }
         });
@@ -71,21 +58,31 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void attemptLogin(String url) {
-        new AsyncTask<String, Void, Void>() {
-            @Override
-            protected Void doInBackground(String... params) {
-                try {
-                    response = ApiCall.POST(
-                            client,
-                            params[0],
-                            RequestBuilder.LoginBody(username, password, token));
-                    Log.d("Response", response);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                return null;
-            }
-        }.execute(url);
+    private class attemptLogin extends AsyncTask<Void, Void, Void> {
+        private ProgressDialog progressDialog;
+        private boolean result;
+
+        @Override
+        protected void onPreExecute(){
+            //           result = false;
+            progressDialog= new ProgressDialog(MainActivity.this);
+            progressDialog.setCancelable(false);
+            progressDialog.setMessage("add");
+
+        }
+        @Override
+        protected Void doInBackground(Void... voids) {
+            DBHelper dbHelper=new DBHelper();
+            result = dbHelper.addDetails(token);
+            return null;
+        }
+
+        protected void onPostExecute(Void result){
+            hideDialog();
+        }
+
+        private void hideDialog() {
+        }
     }
+
 }

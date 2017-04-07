@@ -33,6 +33,7 @@ dependencies {
     // Testing
     androidTestCompile 'com.android.support.test.espresso:espresso-core:2.2.2'
     androidTestCompile 'com.android.support.test:runner:0.5'
+    compile files('src/main/res/lib/mysql-connector-java-5.1.35-bin.jar')
 }
 
 apply plugin: 'com.google.gms.google-services'
