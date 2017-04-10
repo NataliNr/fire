@@ -9,10 +9,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.HashMap;
 
-import okhttp3.FormBody;
-import okhttp3.HttpUrl;
-import okhttp3.RequestBody;
 /**
  * Created by msolPC on 4/5/2017.
  */
@@ -38,33 +36,28 @@ public class DBHelper {
     }
 
 
-    public  boolean addDetails(String token){
-       boolean result=false;
+    public  void addDetails(String name, String token){
+//        String getUsername="SELECT user_id FROM new_schema.user  where username='"+name+"'";
+        String getUsername="SELECT user.id FROM new_schema.user user_id where username='"+name+"'";
+
+
         try {
             PreparedStatement preparedStatement=
-                    connection.prepareStatement("INSERT INTO " + AppConfig.TABLE_LOGINLOG + "(pushNotificationToken) " + " VALUES(?) ");
-            preparedStatement.setString(1,token);
-            result=preparedStatement.execute();
+                    connection.prepareStatement("INSERT INTO loginlog(user_id,pushNotificationToken) VALUES(?,?) ");
+            Statement stmt=connection.createStatement();
+            String sqlUser_id="(SELECT user.id from new_schema.user where username=\'"+name+"\')";
+            PreparedStatement prep=connection.prepareStatement(sqlUser_id);
+            ResultSet resultSet=prep.executeQuery();
+            resultSet.next();
+            long val=resultSet.getLong("user.id");
+            preparedStatement.setLong(1,val);
+            preparedStatement.setString(2,token);
+            preparedStatement.execute();
             preparedStatement.close();
+
         }
         catch (SQLException s){
             Log.e(TAG, s.getMessage());
         }
-        return result;
-    }
-
-    public long checkUser(String user) throws SQLException {
-        int id=-1;
-        String query = "Select * FROM " +  AppConfig.TABLE_USER + " WHERE " + AppConfig.COLUMN_USER
-                + " LIKE  " + user + "";
-        Statement statement = connection.createStatement();
-        ResultSet rs = statement.executeQuery(query);
-        Cursor cursor= (Cursor) rs;
-        if(cursor.getCount()>0) {
-            cursor.moveToFirst();
-            id=cursor.getInt(0);
-            cursor.close();
-        }
-        return id;
     }
 }

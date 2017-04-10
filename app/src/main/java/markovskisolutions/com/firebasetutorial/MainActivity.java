@@ -7,18 +7,23 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.google.firebase.iid.FirebaseInstanceId;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
-import okhttp3.OkHttpClient;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener{
     private static final String TAG = "MainActivity";
 
     EditText username, password;
@@ -52,14 +57,51 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Log.d(TAG, token);
-                 name= username.getText().toString();
+                name= username.getText().toString();
                 new attemptLogin().execute();
 //                Toast.makeText(MainActivity.this, msg, Toast.LENGTH_SHORT).show();
             }
         });
 
 
+        Spinner spinner = (Spinner) findViewById(R.id.spinner1);
+
+        // Spinner click listener
+        spinner.setOnItemSelectedListener(this);
+
+        // Spinner Drop down elements
+        List<String> servers = new ArrayList<String>();
+        servers.add("new_schema");
+        servers.add("red_schema");
+        servers.add("green_schema");
+        servers.add("blue_schema");
+
+
+
+        // Creating adapter for spinner
+        ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, servers);
+
+        // Drop down layout style - list view with radio button
+        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        // attaching data adapter to spinner
+        spinner.setAdapter(dataAdapter);
+
+
     }
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        // On selecting a spinner item
+        String item = parent.getItemAtPosition(position).toString();
+
+        // Showing selected spinner item
+        Toast.makeText(parent.getContext(), "Selected: " + item, Toast.LENGTH_LONG).show();
+    }
+    public void onNothingSelected(AdapterView<?> arg0) {
+        // TODO Auto-generated method stub
+    }
+
+
 
     private class attemptLogin extends AsyncTask<Void, Void, Void> {
         private ProgressDialog progressDialog;
@@ -76,18 +118,8 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected Void doInBackground(Void... voids) {
             DBHelper dbHelper=new DBHelper();
-            try {
-                long id = dbHelper.checkUser(name);
-                if (id == -1) {
-                    result = dbHelper.addDetails(token);
-                    Toast.makeText(MainActivity.this,
-                            "Daaaaa",
-                            Toast.LENGTH_SHORT).show();
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
 
+            dbHelper.addDetails(name, token);
             return null;
         }
 
