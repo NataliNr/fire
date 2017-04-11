@@ -1,6 +1,5 @@
 package markovskisolutions.com.firebasetutorial;
 
-
 import android.app.ProgressDialog;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -13,13 +12,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
-
 import com.google.firebase.iid.FirebaseInstanceId;
-
-import java.io.IOException;
-import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 
@@ -27,7 +21,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     private static final String TAG = "MainActivity";
 
     EditText username, password;
-    String name;
+    String name,getItem;
     String token = FirebaseInstanceId.getInstance().getToken();
 
     @Override
@@ -36,15 +30,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         setContentView(R.layout.activity_main);
         username = (EditText) findViewById(R.id.name);
         password = (EditText) findViewById(R.id.password);
-        // If a notification message is tapped, any data accompanying the notification
-        // message is available in the intent extras. In this sample the launcher
-        // intent is fired when the notification is tapped, so any accompanying data would
-        // be handled here. If you want a different intent fired, set the click_action
-        // field of the notification message to the desired intent. The launcher intent
-        // is used when no click_action is specified.
-        //
-        // Handle possible data accompanying notification message.
-        // [START handle_data_extras]
+        final Spinner spinner = (Spinner) findViewById(R.id.spinner1);
+
         if (getIntent().getExtras() != null) {
             for (String key : getIntent().getExtras().keySet()) {
                 Object value = getIntent().getExtras().get(key);
@@ -58,25 +45,19 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             public void onClick(View v) {
                 Log.d(TAG, token);
                 name= username.getText().toString();
+                getItem = String.valueOf(spinner.getSelectedItem());
                 new attemptLogin().execute();
-//                Toast.makeText(MainActivity.this, msg, Toast.LENGTH_SHORT).show();
             }
         });
 
-
-        Spinner spinner = (Spinner) findViewById(R.id.spinner1);
-
         // Spinner click listener
         spinner.setOnItemSelectedListener(this);
-
         // Spinner Drop down elements
         List<String> servers = new ArrayList<String>();
         servers.add("new_schema");
         servers.add("red_schema");
         servers.add("green_schema");
         servers.add("blue_schema");
-
-
 
         // Creating adapter for spinner
         ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, servers);
@@ -101,7 +82,9 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         // TODO Auto-generated method stub
     }
 
-
+    private void ShowMessage(String msg){
+        Toast.makeText(MainActivity.this, msg, Toast.LENGTH_LONG).show();
+    }
 
     private class attemptLogin extends AsyncTask<Void, Void, Void> {
         private ProgressDialog progressDialog;
@@ -109,26 +92,40 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
         @Override
         protected void onPreExecute(){
-            //           result = false;
-//            progressDialog= new ProgressDialog(MainActivity.this);
-//            progressDialog.setCancelable(false);
-//            progressDialog.setMessage("add");
+            progressDialog= new ProgressDialog(MainActivity.this);
+            progressDialog.setCancelable(false);
+            progressDialog.setMessage("add");
+            showDialog();
 
         }
+
         @Override
         protected Void doInBackground(Void... voids) {
-            DBHelper dbHelper=new DBHelper();
+            DBHelper dbHelper=new DBHelper(getItem);
 
-            dbHelper.addDetails(name, token);
+            result=dbHelper.addDetails(name, token);
             return null;
         }
-
-        protected void onPostExecute(Void result){
+        protected void onPostExecute(Void r) {
             hideDialog();
+            if (result == false) {
+                //result added
+                ShowMessage("added");
+            } else {
+                //details not added
+                ShowMessage("not added");
+            }
+        }
+        private void showDialog(){
+            if (!progressDialog.isShowing()){
+                progressDialog.show();
+            }
         }
 
         private void hideDialog() {
+            if (progressDialog.isShowing()){
+                progressDialog.dismiss();
+            }
         }
     }
-
 }
